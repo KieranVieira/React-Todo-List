@@ -1,82 +1,97 @@
 import React from 'react';
 import TodoList from './components/TodoComponents/TodoList';
 import TodoForm from './components/TodoComponents/TodoForm';
-import './components/TodoComponents/Todo.css'
+import SearchBar from './components/TodoComponents/SearchBar'
+import './components/TodoComponents/Todo.css';
 
 class App extends React.Component {
-  // you will need a place to store your state in this component.
-  // design `App` to be the parent component of your application.
-  // this component is going to take care of state, and any change handlers you need to work with your state
   constructor(){
     super();
     this.state = {
       todoList: [
         {
-          task: 'First Task',
-          id: 1234,
-          completed: false,
+          task: 'Organize Garage',
+          id: 1528817077286,
+          completed: false
         },
         {
-          task: 'Second Task',
-          id: 1235,
-          completed: false,
+          task: 'Bake Cookies',
+          id: 1528817084358,
+          completed: false
         }
       ],
-      inputText: '',
+      taskText: '',
     }
   }
 
-  changeEventHandler = e => {
-    this.setState({ inputText: e.target.value })
-  }
-
-  submitEventHandler = e => {
-    e.preventDefault();
+  handleChange = e => {
     this.setState({
-      todoList: [
-        ...this.state.todoList,
-        {task:this.state.inputText, completed: false, id: Date.now()}
-      ],
-      inputText: ''
+      taskText: e.target.value
     })
   }
 
-  markCompleted = (e, id) => {
-    e.target.classList.toggle('task-completed');
+  handleSubmit = e => {
+    e.preventDefault();
+    if(this.state.taskText.length>1){
+      this.setState({
+        todoList: [
+          ...this.state.todoList,
+          {task: this.state.taskText, completed: false, id: Date.now()}
+        ],
+        taskText: ''
+      })
+    }
+    
+  }
+
+  toggleCompleted = (e,id) => {
     this.setState({
-      todoList: this.state.todoList.map(task => {
-        if(task.id === id){
+      todoList: this.state.todoList.map(todo => {
+        if(todo.id === id){
           return {
-            ...task, 
-            completed: task.completed === true ? false : true
-          };
-        } else {
-          return task;
+            ...todo,
+            completed: !todo.completed
+          }
+        }else {
+          return todo
         }
       })
     })
   }
 
-  removeCompleted = e => {
-    e.preventDefault();
+  clearCompleted = () => {
     this.setState({
-      todoList: this.state.todoList.filter(task => task.completed === false)
+      todoList: this.state.todoList.filter(todo => !todo.completed)
+    })
+  }
+
+  searchTasks = e => {
+    this.setState({
+      todoList: this.state.todoList.filter(todo => {
+        if(todo.task.toLowerCase().includes(e.target.value.toLowerCase())){
+          return todo;
+        }
+      })
     })
   }
 
   render() {
     return (
-      <div className="app"> 
+      <div>
+      <SearchBar searchTasks={this.searchTasks}/>
+      <div className="app">
         <h1 className="header">Todo List</h1>
         <TodoList 
-        todoObjects={this.state.todoList} 
-        markCompleted={this.markCompleted}
+        todoList={this.state.todoList}
+        toggleCompleted={this.toggleCompleted}
         />
         <TodoForm 
-        eventHandler={this.changeEventHandler} 
-        submitHandler={this.submitEventHandler}
-        clearCompleted={this.removeCompleted}
+        handleChange={this.handleChange} 
+        taskText={this.state.taskText}
+        handleSubmit={this.handleSubmit}
+        clearCompleted={this.clearCompleted}
         />
+      </div>
       </div>
     );
   }
